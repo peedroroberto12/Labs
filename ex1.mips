@@ -1,0 +1,65 @@
+# ex1.mips
+.data
+msg_raio:    .asciiz "Digite o raio orbital em km: "
+msg_vel:     .asciiz "Velocidade orbital (km/s): "
+msg_per:     .asciiz "\nPeriodo orbital (s): "
+g:           .float 6.67408e-11
+m:           .float 5.9722e24
+pi:          .float 3.1415927
+
+.text
+.globl main
+
+main:
+    # Solicitar o raio orbital
+    li $v0, 4
+    la $a0, msg_raio
+    syscall
+
+    # Ler raio orbital (float)
+    li $v0, 6
+    syscall
+    mov.s $f2, $f0    # $f2 = raio orbital (r)
+
+    # Calcular G * M
+    la $t0, g
+    l.s $f4, 0($t0)
+    la $t0, m
+    l.s $f6, 0($t0)
+    mul.s $f8, $f4, $f6   # $f8 = G * M
+
+    # Calcular G * M / r
+    div.s $f10, $f8, $f2  # $f10 = G*M/r
+
+    # Calcular sqrt(G*M/r) = v
+    sqrt.s $f12, $f10     # $f12 = v
+
+    # Imprimir velocidade orbital
+    li $v0, 4
+    la $a0, msg_vel
+    syscall
+
+    li $v0, 2
+    mov.s $f12, $f12
+    syscall
+
+    # Calcular periodo orbital: T = 2 * pi * r / v
+    la $t0, pi
+    l.s $f4, 0($t0)
+    li.s $f6, 2.0
+    mul.s $f8, $f6, $f4   # $f8 = 2 * pi
+    mul.s $f10, $f8, $f2  # $f10 = 2 * pi * r
+    div.s $f14, $f10, $f12 # $f14 = T
+
+    # Imprimir periodo orbital
+    li $v0, 4
+    la $a0, msg_per
+    syscall
+
+    li $v0, 2
+    mov.s $f12, $f14
+    syscall
+
+    # Encerrar programa
+    li $v0, 10
+    syscall
